@@ -1,0 +1,80 @@
+{% extends "home.html" %}
+{% load static %}
+
+{% block content %}
+<button><a style="text-decoration: none; color: black;" href="/">Go Back</a></button>
+
+<h3>Succesfully uploaded : {{img.name}}</h3>
+
+<button id="save_image">Save</button>
+<button id="json-data">Json</button>
+<button id="create-polygon">Create Polygon</a></button>
+<button id="create-rect">Create Rectangle</a></button>
+<button id="clear" onClick="deleteObj()">Clear</button>
+
+<div class="canvas-container">
+
+  <div class="col1">
+    <div class="can">
+      <canvas id="c" width="1100" height="600"></canvas>
+    </div>
+  </div>
+
+  <div class="col2">
+    <form action="{% url 'dashboard' %}" id='post-form' method="POST">
+      {% csrf_token %}
+      <input type="text" id="searchbar" >
+    </form>
+
+    <div class="scroller" id="box"> </div> 
+  </div>
+
+</div>
+
+
+<script type="text/javascript">
+  //image we use it in annotate.js for showing it in canvas
+  var image = "{{img.pic.url}}"
+  //A list tran for saving our filtiring
+  var tran = []
+  
+  // getting from data traslations.FR 
+  {% for c in categories %}
+  //Dictionnary for getting properties of each label
+    var dict =
+    {
+      type: "{{c.type}}",
+      key : {{c.key}},
+      translations: "{{c.translations.FR}}", 
+    }
+    //Push everything in tran 
+    tran.push(dict)
+  {% endfor %}
+
+  // Getting Id of input
+  const searchbar = document.getElementById('searchbar')
+
+  //When we load page we show labels and when he search for something he can see it
+  "load keyup".split(" ").forEach(function(event)
+  {
+    window.addEventListener(event,(e) => 
+    {
+      //deleting what is in div #box
+      document.getElementById('box').innerHTML = "";
+      //Saving value of input in variable
+      var searchString = searchbar.value
+      // getting what user type and no problem if its Lower Or Upper case
+      var filteredCharacters = tran.filter (item => item.translations.toLowerCase().includes(searchString.toLowerCase()))
+
+      //Showing the filters
+      for (let  i in filteredCharacters) 
+      {
+        var c = filteredCharacters[i]
+        $('#box').append('<p class="category" onclick="category(`' + c.translations + '`,`' + c.type + '`,' + c.key + ')">' + c.translations + '</p>')
+      }
+    });
+  });
+
+</script>
+
+{% endblock content %}
